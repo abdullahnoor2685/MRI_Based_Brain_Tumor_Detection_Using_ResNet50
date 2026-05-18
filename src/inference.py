@@ -1,23 +1,22 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "d342998b-4916-4283-86ff-9c4f0efb9f27",
-   "metadata": {},
-   "outputs": [],
-   "source": []
-  }
- ],
- "metadata": {
-  "kernelspec": {
-   "display_name": "",
-   "name": ""
-  },
-  "language_info": {
-   "name": ""
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 5
-}
+import torch
+import numpy as np
+from PIL import Image
+from src.preprocessing import val_transform
+
+
+def predict(model, image_path, device):
+
+    model.eval()
+
+    img = Image.open(image_path).convert("RGB")
+    img = val_transform(np.array(img))
+
+    img = img.unsqueeze(0).to(device)
+
+    with torch.no_grad():
+        outputs = model(img)
+        probs = torch.softmax(outputs, dim=1)
+
+        conf, pred = torch.max(probs, 1)
+
+    return pred.item(), conf.item()
